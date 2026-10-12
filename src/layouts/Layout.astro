@@ -1,0 +1,103 @@
+---
+import { Font } from 'astro:assets';
+import Analytics from '@vercel/analytics/astro';
+import '../styles/global.css';
+import { DRIVER, PHONE_E164, SITE, SOCIAL } from '../data/site';
+
+interface Props {
+  title?: string;
+  noindex?: boolean;
+}
+const { title = SITE.title, noindex = false } = Astro.props;
+const site = Astro.site!;
+// page views by source (Instagram, TikTok, ...): only in Vercel builds, after enabling Web Analytics in the project
+const analytics = !!process.env.VERCEL && !noindex;
+const canonical = new URL(Astro.url.pathname, site).href;
+const og = new URL('/og.jpg', site).href;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': `${site.href}#business`,
+  name: SITE.name,
+  description: SITE.description,
+  url: site.href,
+  image: og,
+  logo: new URL('/icon-512.png', site).href,
+  telephone: PHONE_E164,
+  slogan: 'Комфорт · Безопасность · Надёжность',
+  sameAs: SOCIAL.map((s) => s.url),
+  founder: { '@type': 'Person', name: DRIVER.fullName, sameAs: [SOCIAL.find((s) => s.id === 'facebook')!.url] },
+  address: { '@type': 'PostalAddress', addressLocality: 'Бишкек', addressCountry: 'KG' },
+  areaServed: { '@type': 'Country', name: 'Кыргызстан' },
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    opens: '00:00',
+    closes: '23:59',
+  },
+  contactPoint: { '@type': 'ContactPoint', telephone: PHONE_E164, contactType: 'reservations' },
+};
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={SITE.description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content="#090f22" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content={SITE.short} />
+    <meta property="og:title" content="Трансфер и такси по Кыргызстану — водитель Нурбек" />
+    <meta property="og:description" content="Toyota Sienna на 7 мест. Аэропорт «Манас», Иссык-Куль, Каракол, Ош и вся страна. Цена договорная, WhatsApp 0556 07 07 21." />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={og} />
+    <meta property="og:image:secure_url" content={og} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Трансфер по Кыргызстану: Toyota Sienna на дороге вдоль Иссык-Куля" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Трансфер и такси по Кыргызстану — водитель Нурбек" />
+    <meta name="twitter:description" content="Toyota Sienna на 7 мест. Манас, Иссык-Куль, Каракол, Ош. Цена договорная, WhatsApp 0556 07 07 21." />
+    <meta name="twitter:image" content={og} />
+    <meta name="apple-mobile-web-app-title" content="Нурбек" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    {SOCIAL.map((s) => <link rel="me" href={s.url} />)}
+
+    <Font cssVariable="--font-oswald" preload />
+    <Font cssVariable="--font-onest" preload />
+    <Font cssVariable="--font-unbounded" />
+
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    {!noindex && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <slot />
+    <div class="grain" aria-hidden="true"></div>
+    {analytics && <Analytics />}
+    <script>
+      import '../scripts/social';
+    </script>
+    <script>
+      // fade sections in as they enter the viewport
+      const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      const io = new IntersectionObserver(
+        (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }),
+        { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+      );
+      els.forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>

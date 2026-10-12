@@ -1,0 +1,66 @@
+---
+/* Two crossing tapes under the hero: destinations on gold, Kyrgyz road wishes on night. */
+const places = ['Аэропорт «Манас»', 'Иссык-Куль', 'Каракол', 'Ала-Арча', 'Чон-Курчак', 'Токтогул', 'Джалал-Абад', 'Ош', 'Нарын', 'Чолпон-Ата'];
+const wishes = ['Ак жол!', 'Жол болсун!', 'Кош келиңиз!', 'Ысык-Көл', 'Түндүк', 'Ала-Тоо'];
+---
+
+<div class="tapes" aria-hidden="true">
+  <div class="tape tape--night">
+    <div class="tape__track" style="--dur: 46s">
+      {[0, 1].map(() => <span class="tape__set">{[...wishes, ...wishes].map((w) => <span class="tape__item">{w}<i class="horn" /></span>)}</span>)}
+    </div>
+  </div>
+  <div class="tape tape--gold">
+    <div class="tape__track" style="--dur: 38s">
+      {[0, 1].map(() => <span class="tape__set">{places.map((p) => <span class="tape__item">{p}<i class="horn" /></span>)}</span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .tapes {
+    position: relative;
+    z-index: 6;
+    height: clamp(120px, 15vw, 190px);
+    margin-top: clamp(-70px, -5vw, -40px);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .tape {
+    position: absolute;
+    left: -5%;
+    right: -5%;
+    top: 50%;
+    padding: clamp(12px, 1.4vw, 18px) 0;
+    overflow: hidden;
+    box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.6);
+  }
+  .tape--gold { background: var(--color-gold); color: var(--color-night); rotate: -2.2deg; translate: 0 -50%; }
+  .tape--night { background: var(--color-night-3); color: var(--color-ink); rotate: 2.4deg; translate: 0 -40%; border-block: 1px solid rgb(255 255 255 / 0.08); }
+  .tape__track { display: flex; width: max-content; animation: run var(--dur) linear infinite; }
+  .tape--night .tape__track { animation-direction: reverse; }
+  .tape__set { display: flex; }
+  .tape__item {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(18px, 2.2vw, 30px);
+    padding-right: clamp(18px, 2.2vw, 30px);
+    font: 800 clamp(1.05rem, 0.7rem + 1.3vw, 1.75rem) / 1 var(--font-display);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tape--night .tape__item { font-weight: 600; letter-spacing: 0.02em; color: rgb(246 241 231 / 0.75); }
+  .horn {
+    width: 1.7em;
+    height: 0.85em;
+    background: currentColor;
+    mask: var(--horn) center / contain no-repeat;
+  }
+  .tape--gold .horn { background: var(--color-red); }
+  .tape--night .horn { background: var(--color-gold); }
+  @keyframes run { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) {
+    .tape__track { animation: none; }
+  }
+</style>

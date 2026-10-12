@@ -1,0 +1,346 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import poster from '../assets/video-poster.jpg';
+import front from '../assets/photos/front.jpg';
+import side from '../assets/photos/side.jpg';
+import seats from '../assets/photos/seats.jpg';
+import cabin from '../assets/photos/cabin.jpg';
+import Icon from './Icon.astro';
+import Tunduk from './Tunduk.astro';
+import { WA_HELLO } from '../data/site';
+
+const photos = [
+  { src: front, alt: 'Toyota Sienna спереди, номер 01 KG', tilt: -2.2 },
+  { src: side, alt: 'Toyota Sienna сбоку, на крыше багажный бокс', tilt: 1.6 },
+  { src: seats, alt: 'Второй и третий ряд сидений', tilt: -1.4 },
+  { src: cabin, alt: 'Салон: сиденья второго и третьего ряда', tilt: 2 },
+];
+const big = await Promise.all(photos.map((p) => getImage({ src: p.src, width: Math.min(p.src.width, 1280), format: 'webp', quality: 82 })));
+// thumbnails are 220px tall on phones and 300px on desktop: offer widths for those heights at 1-2x
+const thumbs = photos.map((p) => {
+  const a = p.src.width / p.src.height;
+  const widths = [...new Set([220, 300, 440, 600].map((h) => Math.min(p.src.width, Math.round(h * a))))];
+  return { widths, sizes: `(min-width: 1100px) ${Math.round(300 * a)}px, ${Math.round(220 * a)}px` };
+});
+const posterFull = await getImage({ src: poster, width: 720, format: 'webp', quality: 80 });
+---
+
+<section class="about" id="about" aria-labelledby="about-title">
+  <div class="wrap">
+    <header class="head" data-reveal>
+      <p class="eyebrow">01 · Комфорт · безопасность · надёжность</p>
+      <h2 class="h2" id="about-title">От аэропорта —<br />до самых гор</h2>
+      <p class="lead">Трансфер и такси на минивэне: один водитель и одна машина — без диспетчеров и пересадок. Встретим, поможем с багажом и довезём туда, куда нужно: по городу или через перевалы.</p>
+    </header>
+
+    <div class="bento">
+      <article class="tile tile--driver felt" data-reveal>
+        <div class="driver__top">
+          <span class="driver__label">Ваш водитель</span>
+          <Tunduk size={44} stroke={3} class="driver__mark" />
+        </div>
+        <p class="driver__name">Нурбек</p>
+        <p class="driver__text">
+          Встречу в аэропорту «Манас», на вокзале или у дома — в любом районе Бишкека. Помогу с багажом и довезу спокойно и аккуратно: по городу, через перевалы и вдоль Иссык-Куля.
+        </p>
+        <a class="btn btn-ink driver__cta" href={WA_HELLO} target="_blank" rel="noopener" data-cta="driver-wa">
+          <span class="btn__icon btn__icon--wa"><Icon name="whatsapp" size={22} /></span>
+          <span>Написать Нурбеку</span>
+        </a>
+        <span class="band driver__band" aria-hidden="true"></span>
+      </article>
+
+      <article class="tile tile--seven card" data-reveal style="--d:1">
+        <p class="num">7</p>
+        <div>
+          <h3 class="tile__title">мест в салоне</h3>
+          <p class="tile__text">Семья, друзья или небольшая группа — все вместе в одной машине.</p>
+        </div>
+      </article>
+
+      <button class="tile tile--video" type="button" data-video-open data-reveal style="--d:2" aria-label="Смотреть ролик, 24 секунды">
+        <Picture src={poster} alt="" formats={['avif', 'webp']} widths={[360, 540, 720]} sizes="(min-width: 1024px) 290px, (min-width: 640px) 45vw, 92vw" class="video__poster" loading="lazy" />
+        <span class="video__shade"></span>
+        <span class="video__play"><Icon name="play" size={28} /></span>
+        <span class="video__meta"><span class="video__title">Смотреть ролик</span><span class="video__len">24 сек · со звуком</span></span>
+      </button>
+
+      <article class="tile tile--time card" data-reveal style="--d:2">
+        <p class="num num--sm">24/7</p>
+        <div>
+          <h3 class="tile__title">на связи</h3>
+          <p class="tile__text">В Бишкеке сейчас <time class="clock" data-clock>—:—</time> — пишите в любое время.</p>
+        </div>
+      </article>
+
+      <article class="tile tile--meet card" data-reveal>
+        <div class="meet__icons" aria-hidden="true">
+          <span><Icon name="plane" size={26} /></span>
+          <span><Icon name="train" size={26} /></span>
+          <span><Icon name="home" size={26} /></span>
+        </div>
+        <div>
+          <h3 class="tile__title">Встреча там, где удобно</h3>
+          <p class="tile__text">Аэропорт «Манас», вокзал или ваш адрес — в любом районе Бишкека. Отправная точка всех маршрутов — Бишкек.</p>
+        </div>
+      </article>
+
+      <article class="tile tile--luggage card" data-reveal style="--d:1">
+        <span class="tile__icon"><Icon name="luggage" size={26} /></span>
+        <div>
+          <h3 class="tile__title">Багажный бокс</h3>
+          <p class="tile__text">На крыше — бокс для чемоданов, сумок и снаряжения.</p>
+        </div>
+      </article>
+
+      <article class="tile tile--safe card" data-reveal style="--d:2">
+        <span class="tile__icon"><Icon name="shield" size={26} /></span>
+        <div>
+          <h3 class="tile__title">Безопасно и вовремя</h3>
+          <p class="tile__text">Спокойная езда по городу и горным дорогам, подача к назначенному часу.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="car" id="car">
+      <div class="car__head" data-reveal>
+        <div>
+          <p class="eyebrow">Машина</p>
+          <h3 class="car__title">Toyota Sienna</h3>
+        </div>
+        <ul class="car__specs">
+          <li class="chip"><Icon name="users" />7 мест</li>
+          <li class="chip"><Icon name="door" />Сдвижные двери</li>
+          <li class="chip"><Icon name="luggage" />Бокс на крыше</li>
+        </ul>
+      </div>
+      <ul class="photos" aria-label="Реальные фото машины">
+        {photos.map((p, i) => (
+          <li class="photo" style={`--tilt:${p.tilt}deg;--d:${i}`} data-reveal>
+            <button type="button" data-lightbox={big[i].src} data-alt={p.alt} aria-label={`Открыть фото: ${p.alt}`}>
+              <Picture src={p.src} alt={p.alt} formats={['avif', 'webp']} widths={thumbs[i].widths} sizes={thumbs[i].sizes} quality={55} loading="lazy" />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p class="photos__note">Реальные фото машины Нурбека.</p>
+    </div>
+  </div>
+
+  <dialog class="modal modal--video" data-video-dialog aria-label="Ролик: трансфер по Кыргызстану">
+    <button class="modal__close" type="button" data-close aria-label="Закрыть"><Icon name="close" /></button>
+    <video controls playsinline preload="none" data-poster={posterFull.src} data-src="/media/nurbek-transfer.mp4" width="720" height="1280"></video>
+  </dialog>
+  <dialog class="modal modal--photo" data-photo-dialog aria-label="Фото машины">
+    <button class="modal__close" type="button" data-close aria-label="Закрыть"><Icon name="close" /></button>
+    <img alt="" data-photo />
+  </dialog>
+</section>
+
+<style>
+  .about { position: relative; padding: clamp(64px, 9vw, 130px) 0 clamp(70px, 9vw, 120px); }
+  .head { max-width: 760px; margin-bottom: clamp(36px, 5vw, 64px); }
+  .head .h2 { margin: 18px 0 18px; }
+
+  /* ---------- bento */
+  .bento { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  .tile { position: relative; border-radius: 28px; padding: 26px; overflow: hidden; min-width: 0; }
+  .card { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; }
+  .tile__title { font: 700 1.2rem/1.2 var(--font-display); letter-spacing: -0.01em; margin: 0 0 8px; }
+  .tile__text { margin: 0; color: var(--color-mute); font-size: 0.98rem; line-height: 1.55; }
+  .tile__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgb(246 196 67 / 0.12);
+    color: var(--color-gold);
+  }
+  .num { margin: 0; font: 700 clamp(5.5rem, 4rem + 4vw, 8.5rem)/0.82 var(--font-tall); color: var(--color-gold); letter-spacing: -0.02em; }
+  .num--sm { font-size: clamp(4rem, 3rem + 3vw, 6rem); }
+  .clock { color: var(--color-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .tile--driver { display: flex; flex-direction: column; gap: 14px; padding: 30px 30px 54px; }
+  .driver__top { display: flex; align-items: center; justify-content: space-between; }
+  .driver__label { font: 600 0.74rem/1 var(--font-display); letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-red); }
+  .driver__mark { color: var(--color-red); }
+  .driver__name { margin: 6px 0 0; font: 900 clamp(3.4rem, 2rem + 6vw, 6.4rem)/0.9 var(--font-display); letter-spacing: -0.04em; color: var(--color-felt-ink); }
+  .driver__text { margin: 0; max-width: 520px; font-size: 1.06rem; line-height: 1.6; color: #3d3546; }
+  .driver__cta { align-self: flex-start; margin-top: auto; }
+  .driver__band { position: absolute; left: 0; right: 0; bottom: 14px; color: var(--color-red); opacity: 0.85; }
+
+  .tile--video {
+    display: block;
+    min-height: 420px;
+    padding: 0;
+    border: 0;
+    color: #fff;
+    cursor: pointer;
+    background: var(--color-night-2);
+    text-align: left;
+  }
+  .tile--video :global(picture) { position: absolute; inset: 0; }
+  .video__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: scale 1.2s var(--ease-out-expo); }
+  .tile--video:hover .video__poster { scale: 1.05; }
+  .video__shade { position: absolute; inset: 0; background: linear-gradient(to top, rgb(9 15 34 / 0.95) 10%, rgb(9 15 34 / 0) 50%); }
+  .video__play {
+    position: absolute;
+    left: 22px;
+    bottom: 78px;
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--color-gold);
+    color: var(--color-night);
+    box-shadow: 0 0 0 10px rgb(246 196 67 / 0.25);
+    transition: scale 0.4s var(--ease-spring);
+  }
+  .video__play :global(svg) { translate: 2px 0; }
+  .tile--video:hover .video__play { scale: 1.08; }
+  .video__play { width: 62px; height: 62px; box-shadow: 0 0 0 8px rgb(246 196 67 / 0.25); }
+  .video__meta { position: absolute; left: 24px; right: 24px; bottom: 22px; display: grid; gap: 4px; }
+  .video__title { font: 700 1.2rem/1.2 var(--font-display); }
+  .video__len { color: rgb(255 255 255 / 0.7); font-size: 0.92rem; }
+
+  .meet__icons { display: flex; gap: 10px; }
+  .meet__icons span {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgb(246 196 67 / 0.12);
+    color: var(--color-gold);
+  }
+
+  @media (min-width: 640px) {
+    .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tile--driver { grid-column: 1 / -1; }
+    .tile--video { grid-row: span 2; min-height: 0; }
+    .tile--safe { grid-column: 1 / -1; }
+  }
+  @media (min-width: 1024px) {
+    .bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(230px, auto); }
+    .tile--driver { grid-column: 1 / 3; grid-row: 1 / 3; padding: 38px 38px 64px; }
+    .tile--seven { grid-column: 3; grid-row: 1; }
+    .tile--video { grid-column: 4; grid-row: 1 / 3; }
+    .tile--time { grid-column: 3; grid-row: 2; }
+    .tile--meet { grid-column: 1 / 3; grid-row: 3; }
+    .tile--luggage { grid-column: 3; grid-row: 3; }
+    .tile--safe { grid-column: 4; grid-row: 3; }
+  }
+
+  /* ---------- the car and its real photos */
+  .car { margin-top: clamp(64px, 8vw, 110px); }
+  .car__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 30px; margin-bottom: 30px; }
+  .car__title { margin: 12px 0 0; font: 800 clamp(1.9rem, 1.2rem + 2.6vw, 3.1rem)/1 var(--font-display); letter-spacing: -0.03em; }
+  .car__specs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .photos {
+    display: flex;
+    gap: 18px;
+    margin: 0 -16px;
+    padding: 14px 16px 26px;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .photos::-webkit-scrollbar { display: none; }
+  .photo { flex: none; scroll-snap-align: center; rotate: var(--tilt); transition: rotate 0.5s var(--ease-out-expo); }
+  .photo:hover { rotate: 0deg; }
+  .photo button {
+    display: block;
+    padding: 8px 8px 30px;
+    border: 0;
+    border-radius: 18px;
+    background: #fbf7ef;
+    box-shadow: 0 24px 50px -24px rgb(0 0 0 / 0.75);
+    cursor: zoom-in;
+  }
+  .photo :global(img) { height: clamp(220px, 26vw, 300px); width: auto; border-radius: 11px; }
+  .photos__note { margin: 4px 0 0; color: var(--color-mute); font-size: 0.9rem; }
+  @media (min-width: 1100px) {
+    /* one row of polaroids, each cropped to its column */
+    .photos { display: grid; grid-template-columns: 0.72fr 1.5fr 0.9fr 1.5fr; gap: 22px; margin: 0; padding: 14px 0 30px; overflow: visible; }
+    .photo button { width: 100%; }
+    .photo :global(img) { width: 100%; height: 300px; object-fit: cover; }
+  }
+
+  /* ---------- dialogs */
+  .modal {
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+  }
+  .modal::backdrop { background: rgb(4 7 18 / 0.86); backdrop-filter: blur(6px); }
+  .modal[open] { animation: pop 0.45s var(--ease-out-expo); }
+  .modal video { height: min(86svh, 1280px); width: auto; max-width: 94vw; aspect-ratio: 9 / 16; border-radius: 22px; background: #000; }
+  .modal img { max-width: 94vw; max-height: 86svh; border-radius: 18px; }
+  .modal__close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-gold);
+    color: var(--color-night);
+    cursor: pointer;
+  }
+  @media (max-width: 640px) {
+    .modal__close { top: 8px; right: 8px; }
+  }
+  @keyframes pop { from { opacity: 0; scale: 0.94; } }
+</style>
+
+<script>
+  // live clock in Bishkek (UTC+6) for the 24/7 tile
+  const clock = document.querySelector<HTMLTimeElement>('[data-clock]');
+  if (clock) {
+    const fmt = new Intl.DateTimeFormat('ru-RU', { timeZone: 'Asia/Bishkek', hour: '2-digit', minute: '2-digit' });
+    const tick = () => { clock.textContent = fmt.format(new Date()); };
+    tick();
+    setInterval(tick, 15_000);
+  }
+
+  // dialogs: the promo video and the photo viewer
+  const closeOnBackdrop = (d: HTMLDialogElement) => {
+    d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
+    d.querySelector('[data-close]')?.addEventListener('click', () => d.close());
+  };
+  const vDialog = document.querySelector<HTMLDialogElement>('[data-video-dialog]');
+  const video = vDialog?.querySelector('video');
+  if (vDialog && video) {
+    closeOnBackdrop(vDialog);
+    document.querySelector('[data-video-open]')?.addEventListener('click', () => {
+      if (!video.src) { video.poster = video.dataset.poster!; video.src = video.dataset.src!; }
+      vDialog.showModal();
+      video.play().catch(() => {});
+    });
+    vDialog.addEventListener('close', () => video.pause());
+  }
+  const pDialog = document.querySelector<HTMLDialogElement>('[data-photo-dialog]');
+  const pImg = pDialog?.querySelector<HTMLImageElement>('[data-photo]');
+  if (pDialog && pImg) {
+    closeOnBackdrop(pDialog);
+    document.querySelectorAll<HTMLButtonElement>('[data-lightbox]').forEach((b) =>
+      b.addEventListener('click', () => {
+        pImg.src = b.dataset.lightbox!;
+        pImg.alt = b.dataset.alt || '';
+        pDialog.showModal();
+      }),
+    );
+  }
+</script>

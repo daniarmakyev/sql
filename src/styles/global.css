@@ -1,0 +1,248 @@
+/* Tailwind for the reset and the design tokens; styling lives in the components, so only the
+   utilities listed here are generated. */
+@import "tailwindcss" source(none);
+@source inline("sr-only");
+
+/* Night over the Tian Shan, the gold of the flag's sun, shyrdak felt and its red, Issyk-Kul turquoise.
+   static: the components use these through var(), so keep every token in the output. */
+@theme static {
+  --color-night: #090f22;
+  --color-night-2: #0e1631;
+  --color-night-3: #16213f;
+  --color-ink: #f6f1e7;
+  --color-mute: #9ea9c5;
+  --color-gold: #f6c443;
+  --color-gold-2: #ffdb7d;
+  --color-gold-deep: #c8961f;
+  --color-felt: #f3ead8;
+  --color-felt-2: #e8d8ba;
+  --color-felt-ink: #1d1830;
+  --color-felt-mute: #6c6175;
+  --color-red: #c4372d;
+  --color-red-deep: #8e2620;
+  --color-lake: #3ab7b0;
+  --color-wa: #25d366;
+
+  --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-unbounded), ui-sans-serif, sans-serif;
+  --font-tall: var(--font-oswald), "Arial Narrow", sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    scroll-padding-top: 84px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+  body {
+    background: var(--color-night);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+  ::selection { background: var(--color-gold); color: var(--color-night); }
+  :focus-visible { outline: 2px solid var(--color-gold); outline-offset: 3px; }
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  img, svg, video { display: block; }
+  [hidden] { display: none !important; }
+}
+
+@layer components {
+  .wrap {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+  @media (min-width: 640px) { .wrap { padding-inline: 28px; } }
+  @media (min-width: 1024px) { .wrap { padding-inline: 40px; } }
+
+  /* ---- type */
+  .eyebrow {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.75em;
+    font: 600 0.72rem/1.2 var(--font-display);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+  }
+  .eyebrow::before {
+    content: "";
+    flex: none;
+    width: 1.9em;
+    height: 0.95em;
+    translate: 0 0.08em;
+    background: currentColor;
+    mask: var(--horn) center / contain no-repeat;
+  }
+  .h2 {
+    font: 800 clamp(2rem, 1.2rem + 3.6vw, 3.9rem)/1.02 var(--font-display);
+    letter-spacing: -0.025em;
+  }
+  .lead { font-size: clamp(1.02rem, 0.96rem + 0.3vw, 1.18rem); line-height: 1.62; color: var(--color-mute); }
+
+  /* ---- buttons */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    min-height: 56px;
+    padding: 0.5rem 1.6rem 0.5rem 0.6rem;
+    border-radius: 999px;
+    font: 600 1rem/1.1 var(--font-sans);
+    white-space: nowrap;
+    isolation: isolate;
+    overflow: hidden;
+    transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s var(--ease-out-expo), background-color 0.25s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-gold {
+    background: var(--color-gold);
+    color: var(--color-night);
+    box-shadow: 0 10px 34px -8px rgb(246 196 67 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.45);
+  }
+  .btn-gold::after {
+    /* a glint that sweeps across, like the captions in the promo */
+    content: "";
+    position: absolute;
+    inset: -40% auto -40% -30%;
+    width: 28%;
+    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.75), transparent);
+    transform: translateX(-120%) skewX(-18deg);
+    z-index: -1;
+    animation: glint 5.5s var(--ease-out-expo) 2.2s infinite;
+  }
+  @media (hover: hover) {
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -8px rgb(246 196 67 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.45); }
+    .btn-glass:hover { background: rgb(255 255 255 / 0.16); transform: translateY(-2px); }
+  }
+  .btn-glass {
+    background: rgb(255 255 255 / 0.09);
+    color: var(--color-ink);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  }
+  .btn-ink { background: var(--color-felt-ink); color: var(--color-felt); }
+  .btn__icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    flex: none;
+  }
+  .btn__icon--wa { background: var(--color-wa); color: #fff; box-shadow: 0 0 0 3px rgb(255 255 255 / 0.25); }
+  .btn__icon--ghost { background: rgb(255 255 255 / 0.12); }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.5em 0.95em;
+    border-radius: 999px;
+    font: 600 0.84rem/1 var(--font-sans);
+    background: rgb(9 15 34 / 0.5);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    white-space: nowrap;
+  }
+  .chip svg { width: 1.05em; height: 1.05em; color: var(--color-gold); }
+
+  /* ---- surfaces */
+  .felt {
+    background-color: var(--color-felt);
+    background-image: var(--noise);
+    background-size: 220px;
+    color: var(--color-felt-ink);
+  }
+  .card {
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.055), rgb(255 255 255 / 0.02));
+    border: 1px solid rgb(255 255 255 / 0.08);
+  }
+
+  /* shyrdak border: a running row of ram's horns (кочкор мүйүз) */
+  .band {
+    height: 22px;
+    background: currentColor;
+    mask: var(--horn-band) left center / auto 100% repeat-x;
+  }
+  .band--down { transform: scaleY(-1); }
+
+  /* ---- reveal on scroll (classes toggled by src/scripts/reveal.ts) */
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+    transition-delay: calc(var(--d, 0) * 90ms);
+  }
+  .js [data-reveal].is-in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .js [data-reveal] { transform: none; transition: opacity 0.4s; }
+    .btn-gold::after { animation: none; }
+  }
+}
+
+@keyframes glint {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  22%, 100% { transform: translateX(520%) skewX(-18deg); }
+}
+
+:root {
+  /* film grain / felt fibre: fractal noise, tinted by the surface underneath */
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* one ram's horn pair: stem + two outward spirals */
+  --horn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 32'%3E%3Cpath d='M32 31V20C32 10 26 5 19 5 12 5 8.5 10 10 15.5 11.5 20.5 18.5 21 20 16.5 21 13.3 18 11.6 15.8 13M32 20C32 10 38 5 45 5 52 5 55.5 10 54 15.5 52.5 20.5 45.5 21 44 16.5 43 13.3 46 11.6 48.2 13' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  /* the same horns on a ground line, alternating up and down: a shyrdak edge */
+  --horn-band: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 44'%3E%3Cg fill='none' stroke='%23000' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0 22H96'/%3E%3Cpath d='M24 22V14C24 8 20 4.5 15.5 4.5 11 4.5 8.6 7.8 9.6 11.2 10.6 14.4 15 14.8 16 12 16.6 10 14.8 8.9 13.4 9.8M24 14C24 8 28 4.5 32.5 4.5 37 4.5 39.4 7.8 38.4 11.2 37.4 14.4 33 14.8 32 12 31.4 10 33.2 8.9 34.6 9.8'/%3E%3Cpath d='M72 22V30C72 36 68 39.5 63.5 39.5 59 39.5 56.6 36.2 57.6 32.8 58.6 29.6 63 29.2 64 32 64.6 34 62.8 35.1 61.4 34.2M72 30C72 36 76 39.5 80.5 39.5 85 39.5 87.4 36.2 86.4 32.8 85.4 29.6 81 29.2 80 32 79.4 34 81.2 35.1 82.6 34.2'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* fine grain over the whole page, like the promo film */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-image: var(--noise);
+  background-size: 220px;
+  opacity: 0.35;
+  mix-blend-mode: soft-light;
+}
+
+/* small status message (copied, shared) */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 70;
+  max-width: calc(100vw - 32px);
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-night);
+  font: 600 0.95rem/1.3 var(--font-sans);
+  box-shadow: 0 18px 40px -14px rgb(0 0 0 / 0.6);
+  translate: -50% 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, translate 0.45s var(--ease-out-expo);
+}
+.toast.is-on { opacity: 1; translate: -50% 0; }

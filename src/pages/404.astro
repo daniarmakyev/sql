@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import Tunduk from '../components/Tunduk.astro';
+import { WA_HELLO } from '../data/site';
+---
+
+<Layout title="Страница не найдена — Нурбек · Трансфер по Кыргызстану" noindex>
+  <main class="lost">
+    <Tunduk size={72} stroke={3} class="lost__mark" />
+    <p class="lost__kg">Жолдон адаштыңызбы?</p>
+    <h1 class="lost__title">Похоже, вы свернули не туда</h1>
+    <p class="lost__text">Такой страницы нет. Вернёмся на главную — или сразу напишите Нурбеку, он подскажет дорогу.</p>
+    <div class="lost__cta">
+      <a class="btn btn-gold" href="/"><span class="btn__icon btn__icon--ghost"><Icon name="home" size={20} /></span><span>На главную</span></a>
+      <a class="btn btn-glass" href={WA_HELLO} target="_blank" rel="noopener"><span class="btn__icon btn__icon--wa"><Icon name="whatsapp" size={22} /></span><span>WhatsApp</span></a>
+    </div>
+    <span class="band lost__band" aria-hidden="true"></span>
+  </main>
+</Layout>
+
+<style>
+  .lost {
+    min-height: 100svh;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    background: radial-gradient(60% 50% at 50% 30%, rgb(246 196 67 / 0.12), transparent 70%), var(--color-night);
+    position: relative;
+  }
+  .lost__mark { color: var(--color-gold); }
+  .lost__kg { margin: 8px 0 0; font: 700 0.8rem/1 var(--font-display); letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-gold); }
+  .lost__title { margin: 0; font: 800 clamp(2rem, 1.2rem + 3.6vw, 3.6rem)/1.05 var(--font-display); letter-spacing: -0.03em; max-width: 760px; }
+  .lost__text { margin: 0; max-width: 520px; color: var(--color-mute); font-size: 1.06rem; }
+  .lost__cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 10px; }
+  .lost .btn__icon--ghost { background: rgb(9 15 34 / 0.12); }
+  .lost__band { position: absolute; left: 0; right: 0; bottom: 24px; color: rgb(246 196 67 / 0.35); }
+</style>

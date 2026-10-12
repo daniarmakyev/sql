@@ -1,0 +1,393 @@
+---
+import { getImage } from 'astro:assets';
+import roadDesktop from '../assets/hero/road-desktop.jpg';
+import roadMobile from '../assets/hero/road-mobile.jpg';
+import carDesktop from '../assets/hero/car-desktop.png';
+import carMobile from '../assets/hero/car-mobile.png';
+import hero from '../data/hero.json';
+import Icon from './Icon.astro';
+import Tunduk from './Tunduk.astro';
+import { PHONE_DISPLAY, TEL, WA_HELLO } from '../data/site';
+
+type Src = typeof roadDesktop;
+async function srcset(src: Src, widths: number[], format: 'avif' | 'webp', quality: number) {
+  const imgs = await Promise.all(widths.map((width) => getImage({ src, width, format, quality })));
+  return imgs.map((img, i) => `${img.src} ${widths[i]}w`).join(', ');
+}
+
+// Art direction: a 16:9 render for landscape screens and a 9:16 one for phones.
+// The car-only layers sit on top of the word so "ТРАНСФЕР" stands behind the car.
+const PORTRAIT = '(max-aspect-ratio: 4/5)';
+const road = {
+  d: { avif: await srcset(roadDesktop, [1280, 1920, 2560], 'avif', 58), webp: await srcset(roadDesktop, [1280, 1920, 2560], 'webp', 76) },
+  m: { avif: await srcset(roadMobile, [540, 860, 1080], 'avif', 58), webp: await srcset(roadMobile, [540, 860, 1080], 'webp', 76) },
+  fallback: (await getImage({ src: roadDesktop, width: 1920, format: 'jpg', quality: 78 })).src,
+};
+const car = {
+  d: { avif: await srcset(carDesktop, [640, 960, 1237], 'avif', 62), webp: await srcset(carDesktop, [640, 960, 1237], 'webp', 80) },
+  m: { avif: await srcset(carMobile, [400, 600, 769], 'avif', 62), webp: await srcset(carMobile, [400, 600, 769], 'webp', 80) },
+  fallback: (await getImage({ src: carDesktop, width: 960, format: 'webp', quality: 80 })).src,
+};
+const stageD = 'max(100vw, 177.78svh)';
+const stageM = 'max(100vw, 56.25svh)';
+const [dx, dy, dw, dh] = hero.desktop.car;
+const [mx, my, mw, mh] = hero.mobile.car;
+const word = [...'ТРАНСФЕР'];
+---
+
+<section class="hero" id="top" aria-labelledby="hero-title" style={`--dx:${dx}%;--dy:${dy}%;--dw:${dw}%;--dh:${dh}%;--mx:${mx}%;--my:${my}%;--mw:${mw}%;--mh:${mh}%`}>
+  <div class="stage" data-stage>
+    <picture class="layer road">
+      <source media={PORTRAIT} type="image/avif" srcset={road.m.avif} sizes={stageM} />
+      <source media={PORTRAIT} type="image/webp" srcset={road.m.webp} sizes={stageM} />
+      <source type="image/avif" srcset={road.d.avif} sizes={stageD} />
+      <source type="image/webp" srcset={road.d.webp} sizes={stageD} />
+      <img src={road.fallback} alt="Toyota Sienna Нурбека на дороге вдоль Иссык-Куля, позади — снежные горы" width="2560" height="1440" fetchpriority="high" decoding="async" />
+    </picture>
+
+    <div class="sky-shade" aria-hidden="true"></div>
+
+    <p class="kicker" aria-hidden="true">
+      <Tunduk size={18} stroke={4} />
+      <span>Кош келиңиз!</span>
+    </p>
+
+    <h1 class="word" id="hero-title">
+      <span class="sr-only">Трансфер и такси по Кыргызстану — водитель Нурбек</span>
+      <span class="word__clip" aria-hidden="true">{word.map((ch, i) => <span class="word__l" style={`--i:${i}`}>{ch}</span>)}</span>
+    </h1>
+
+    <picture class="layer car" aria-hidden="true">
+      <source media={PORTRAIT} type="image/avif" srcset={car.m.avif} sizes={`calc(${stageM} * ${mw / 100})`} />
+      <source media={PORTRAIT} type="image/webp" srcset={car.m.webp} sizes={`calc(${stageM} * ${mw / 100})`} />
+      <source type="image/avif" srcset={car.d.avif} sizes={`calc(${stageD} * ${dw / 100})`} />
+      <source type="image/webp" srcset={car.d.webp} sizes={`calc(${stageD} * ${dw / 100})`} />
+      <img src={car.fallback} alt="" width="1237" height="566" decoding="async" />
+    </picture>
+
+    <div class="spot spot--box" aria-hidden="true"><span class="spot__dot"></span><span class="spot__tag"><Icon name="luggage" size={16} /> Багажный бокс</span></div>
+    <div class="spot spot--seats" aria-hidden="true"><span class="spot__dot"></span><span class="spot__tag"><Icon name="users" size={16} /> 7 мест</span></div>
+
+    <div class="badge" aria-hidden="true">
+      <svg viewBox="0 0 200 200" class="badge__ring">
+        <defs><path id="badge-path" d="M100 100m-79 0a79 79 0 1 1 158 0a79 79 0 1 1-158 0" /></defs>
+        <text><textPath href="#badge-path" textLength="494" lengthAdjust="spacing">ТРАНСФЕР • ПО КЫРГЫЗСТАНУ • АК ЖОЛ • 24/7 •</textPath></text>
+      </svg>
+      <Tunduk class="badge__mark" size={64} stroke={2.6} />
+    </div>
+
+    <p class="intro">
+      Водитель <b>Нурбек</b> и просторная <b>Toyota&nbsp;Sienna</b> на&nbsp;7&nbsp;мест. Из&nbsp;Бишкека — в&nbsp;любую точку страны.
+    </p>
+  </div>
+
+  <div class="hero-ui">
+    <div class="bar">
+      <div class="bar__title">
+        <span class="pill">по Кыргызстану</span>
+        <span class="bar__sub">Водитель Нурбек · Toyota&nbsp;Sienna · 7&nbsp;мест</span>
+      </div>
+      <div class="bar__cta">
+        <a class="btn btn-gold" href={WA_HELLO} target="_blank" rel="noopener" data-cta="hero-wa">
+          <span class="btn__icon btn__icon--wa"><Icon name="whatsapp" size={22} /></span>
+          <span><span class="wa-long">Написать в </span>WhatsApp</span>
+        </a>
+        <a class="btn btn-glass" href={TEL} data-cta="hero-call">
+          <span class="btn__icon btn__icon--ghost"><Icon name="phone" size={20} /></span>
+          <span class="call-label"><span class="call-label__short">Позвонить</span><span class="call-label__num">{PHONE_DISPLAY}</span></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    height: 100svh;
+    min-height: 600px;
+    max-height: 1500px;
+    overflow: hidden;
+    container: hero / size;
+    background: linear-gradient(#3f6aa3, #6f93bf 55%, var(--color-night) 85%);
+    isolation: isolate;
+  }
+  .hero::after {
+    /* fade into the page below, keep the bottom bar readable */
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 34%;
+    background: linear-gradient(to top, var(--color-night) 0%, rgb(9 15 34 / 0.72) 34%, rgb(9 15 34 / 0) 100%);
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  /* ---------- the stage: a 16:9 (or 9:16) box that covers the hero, every layer positioned in its % */
+  .stage {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    width: max(100cqw, 177.78cqh);
+    aspect-ratio: 16 / 9;
+    translate: -50% -42%;
+    container: stage / inline-size;
+    --car-x: var(--dx);
+    --car-y: var(--dy);
+    --car-w: var(--dw);
+    --car-h: var(--dh);
+    --word-x: 48.6%;
+    --word-base: 50%;
+    --word-size: 16.8cqw;
+  }
+  .layer { position: absolute; inset: 0; }
+  .layer img { width: 100%; height: 100%; object-fit: cover; }
+  .road { z-index: 0; }
+  .road img { transform-origin: 48% 60%; }
+  .car { inset: auto; left: var(--car-x); top: var(--car-y); width: var(--car-w); height: var(--car-h); z-index: 3; }
+
+  .sky-shade {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(60% 45% at 48% 38%, rgb(9 15 34 / 0.18), transparent 70%),
+      linear-gradient(to bottom, rgb(9 15 34 / 0.62) 0%, rgb(9 15 34 / 0.28) 26%, rgb(9 15 34 / 0) 46%);
+  }
+
+  /* ---------- the word, standing behind the car */
+  .word {
+    position: absolute;
+    z-index: 2;
+    left: var(--word-x);
+    top: calc(var(--word-base) - 0.857em);
+    translate: -50% 0;
+    margin: 0;
+    font: 700 var(--word-size) / 0.81 var(--font-tall);
+    letter-spacing: -0.005em;
+    color: #fff;
+    white-space: nowrap;
+    text-shadow: 0 0.02em 0.3em rgb(6 12 30 / 0.22);
+    pointer-events: none;
+  }
+  .word__clip { display: block; }
+  .word__l { display: inline-block; }
+
+  .kicker {
+    position: absolute;
+    z-index: 2;
+    left: var(--word-x);
+    top: calc(var(--word-base) - var(--word-size) * 0.81 - 4.2cqw);
+    translate: -50% 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    margin: 0;
+    font: 700 clamp(0.72rem, 1.05cqw, 1.15rem) / 1 var(--font-display);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    white-space: nowrap;
+  }
+
+  /* ---------- hotspots on the car (desktop) */
+  .spot { position: absolute; z-index: 4; display: none; align-items: center; gap: 10px; }
+  .spot__dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 5px rgb(255 255 255 / 0.28), 0 4px 14px rgb(0 0 0 / 0.35);
+    animation: ping 2.6s ease-out infinite;
+  }
+  .spot__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px 8px 11px;
+    border-radius: 999px;
+    font: 600 clamp(0.78rem, 0.85cqw, 1rem) / 1 var(--font-sans);
+    color: var(--color-ink);
+    background: rgb(9 15 34 / 0.62);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    white-space: nowrap;
+  }
+  .spot__tag :global(svg) { color: var(--color-gold); }
+  .spot--box { left: 38.8%; top: 43.4%; flex-direction: row-reverse; translate: calc(-100% + 7px) -50%; }
+  .spot--seats { left: 51%; top: 56.5%; translate: -7px -50%; }
+  @keyframes ping {
+    0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.55), 0 4px 14px rgb(0 0 0 / 0.35); }
+    70%, 100% { box-shadow: 0 0 0 16px rgb(255 255 255 / 0), 0 4px 14px rgb(0 0 0 / 0.35); }
+  }
+
+  /* ---------- rotating badge */
+  .badge {
+    position: absolute;
+    z-index: 2;
+    left: 77.5%;
+    top: 52%;
+    width: 9cqw;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    color: var(--color-gold);
+  }
+  .badge__ring { position: absolute; inset: 0; width: 100%; height: 100%; animation: spin 26s linear infinite; }
+  .badge__ring text { font: 700 15px/1 var(--font-display); letter-spacing: 0.06em; fill: #fff; }
+  .badge__mark { width: 44%; height: 44%; }
+  @keyframes spin { to { rotate: 360deg; } }
+
+  /* ---------- UI over the art */
+  .hero-ui {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 16px max(20px, env(safe-area-inset-bottom));
+    pointer-events: none;
+  }
+  .hero-ui > * { pointer-events: auto; }
+  .intro { display: none; }
+  .bar {
+    width: 100%;
+    max-width: 1180px;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px 28px;
+    padding: 14px 14px 14px 26px;
+    border-radius: 32px;
+    background: rgb(9 15 34 / 0.5);
+    border: 1px solid rgb(255 255 255 / 0.12);
+    backdrop-filter: blur(18px) saturate(1.3);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.6);
+  }
+  .bar__title { display: flex; align-items: center; gap: 18px; min-width: 0; }
+  .pill {
+    display: inline-block;
+    padding: 0.62em 1.05em 0.58em;
+    border-radius: 14px;
+    background: var(--color-gold);
+    color: var(--color-night);
+    font: 800 clamp(0.95rem, 0.7rem + 0.7vw, 1.25rem) / 1 var(--font-display);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 0 10px 30px -10px rgb(246 196 67 / 0.6);
+  }
+  .bar__sub { color: var(--color-mute); font-size: 0.95rem; }
+  .bar__cta { display: flex; gap: 12px; }
+  .call-label__short { display: none; }
+
+  /* ---------- intro animation (html.js .hero.is-ready) */
+  :global(.js) .road img { scale: 1.07; transition: scale 2.6s var(--ease-out-expo); }
+  :global(.js) .hero.is-ready .road img { scale: 1; }
+  :global(.js) .word__l { translate: 0 34%; opacity: 0; transition: translate 1.3s var(--ease-out-expo), opacity 0.9s ease; transition-delay: calc(0.3s + var(--i) * 0.07s); }
+  :global(.js) .hero.is-ready .word__l { translate: 0 0; opacity: 1; }
+  :global(.js) .kicker,
+  :global(.js) .badge,
+  :global(.js) .spot,
+  :global(.js) .bar { opacity: 0; transition: opacity 1s ease, translate 1.2s var(--ease-out-expo); }
+  :global(.js) .bar { translate: 0 24px; }
+  :global(.js) .hero.is-ready .kicker { opacity: 1; transition-delay: 0.9s; }
+  :global(.js) .hero.is-ready .badge { opacity: 1; transition-delay: 1.2s; }
+  :global(.js) .hero.is-ready .spot { opacity: 1; transition-delay: 1.5s; }
+  :global(.js) .hero.is-ready .bar { opacity: 1; translate: 0 0; transition-delay: 0.75s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .road img,
+    :global(.js) .word__l { scale: 1; translate: 0 0; opacity: 1; transition: none; }
+    .badge__ring, .spot__dot { animation: none; }
+  }
+
+  /* scroll-linked depth: the word drifts up faster than the road */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .word, .kicker, .badge { animation: drift linear both; animation-timeline: scroll(root); animation-range: 0 100svh; }
+      .road img, .car img { animation: sink linear both; animation-timeline: scroll(root); animation-range: 0 100svh; }
+    }
+  }
+  @keyframes drift { to { transform: translateY(-38cqh); opacity: 0.2; } }
+  @keyframes sink { to { transform: translateY(9%); } }
+
+  /* ---------- layout variants */
+  @media (min-width: 1024px) {
+    .spot { display: flex; }
+  }
+  @media (max-width: 1023px) {
+    .bar { flex-direction: column; align-items: stretch; padding: 16px; border-radius: 28px; }
+    .bar__title { justify-content: space-between; }
+    .bar__cta > * { flex: 1; }
+  }
+  @media (max-width: 640px) {
+    .bar__sub { display: none; }
+    .bar__title { justify-content: center; }
+    .bar { gap: 14px; background: rgb(9 15 34 / 0.38); }
+    .bar__cta { gap: 10px; }
+    .btn { padding-right: 1.1rem; font-size: 0.95rem; min-height: 54px; }
+    .call-label__short { display: inline; }
+    .call-label__num { display: none; }
+    .wa-long { display: none; }
+  }
+
+  /* phones and tall screens: the 9:16 render */
+  @media (max-aspect-ratio: 4/5) {
+    .stage {
+      width: max(100cqw, 56.25cqh);
+      aspect-ratio: 9 / 16;
+      top: 46%;
+      translate: -50% -46%;
+      --car-x: var(--mx);
+      --car-y: var(--my);
+      --car-w: var(--mw);
+      --car-h: var(--mh);
+      --word-x: 48%;
+      --word-base: 61.6%;
+      --word-size: 16.6cqw;
+    }
+    .kicker { display: none; }
+    .badge { left: 50%; translate: -50% 0; top: 12.5%; width: 20cqw; }
+    .intro {
+      display: block;
+      position: absolute;
+      z-index: 2;
+      left: 50%;
+      translate: -50% 0;
+      top: 26.5%;
+      width: min(84vw, 400px);
+      margin: 0;
+      text-align: center;
+      font-size: clamp(1rem, 4.2vw, 1.15rem);
+      line-height: 1.45;
+      color: rgb(255 255 255 / 0.9);
+      text-shadow: 0 1px 12px rgb(6 12 30 / 0.45);
+    }
+    .intro b { color: #fff; font-weight: 700; }
+  }
+  /* shorter portrait screens (older phones, tablets): lift the car clear of the bottom bar */
+  @media (max-aspect-ratio: 4/5) and (min-aspect-ratio: 1/2) {
+    .stage { top: calc(46% - 7cqh); }
+    .badge { top: calc(12.5% + 7cqh); }
+    .intro { top: calc(26.5% + 7cqh); }
+  }
+</style>
+
+<script>
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const img = hero?.querySelector<HTMLImageElement>('.road img');
+  if (hero && img) {
+    const go = () => requestAnimationFrame(() => hero.classList.add('is-ready'));
+    if (img.complete) go();
+    else {
+      img.addEventListener('load', go, { once: true });
+      img.addEventListener('error', go, { once: true });
+      setTimeout(go, 2500);
+    }
+  }
+</script>

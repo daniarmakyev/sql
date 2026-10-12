@@ -1,0 +1,21 @@
+---
+/* Түндүк — the crown of the yurt, drawn as on the flag: a ring crossed by two sets of three
+   bent laths that meet in a dome, leaving the open arch below. */
+interface Props {
+  class?: string;
+  size?: number;
+  stroke?: number;
+}
+const { class: cls, size = 40, stroke = 3.4 } = Astro.props;
+const id = `tk-${Math.random().toString(36).slice(2, 8)}`;
+const radii = [20, 24.5, 29];
+---
+
+<svg class={cls} width={size} height={size} viewBox="0 0 48 48" fill="none" stroke="currentColor" aria-hidden="true">
+  <defs><clipPath id={id}><circle cx="24" cy="24" r="19" /></clipPath></defs>
+  <circle cx="24" cy="24" r="19.6" stroke-width={stroke} />
+  <g clip-path={`url(#${id})`} stroke-width={stroke * 0.8}>
+    {radii.map((r) => <circle cx="34" cy="42" r={r} />)}
+    {radii.map((r) => <circle cx="14" cy="42" r={r} />)}
+  </g>
+</svg>

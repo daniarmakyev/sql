@@ -1,0 +1,349 @@
+---
+import { Picture } from 'astro:assets';
+import relief from '../assets/map/relief.png';
+import geo from '../data/geo.json';
+import Icon from './Icon.astro';
+import { waLink } from '../data/site';
+
+const [, , VW, VH] = geo.viewBox;
+const nums = (d: string) => d.replace(/[MZ]/g, ' ').trim().split(/\s+/).map(Number);
+const pct = (x: number, y: number) => `left:${((x / VW) * 100).toFixed(3)}%;top:${((y / VH) * 100).toFixed(3)}%`;
+const [bx, by] = geo.bishkek;
+
+const ROAD: Record<string, string> = {
+  manas: 'Встреча с рейса в аэропорту «Манас» и поездки в аэропорт к вылету.',
+  'ala-archa': 'Национальный парк в ущелье Ала-Арча — около часа от города.',
+  'chon-kurchak': 'Горы и лыжная база рядом с Бишкеком.',
+  'issyk-kul': 'Через Токмок, Боомское ущелье и Балыкчы — на северный берег: Чолпон-Ата, Бостери.',
+  karakol: 'Вдоль северного берега Иссык-Куля; рядом ущелья Джети-Огуз и Алтын-Арашан.',
+  toktogul: 'По трассе Бишкек — Ош: перевалы Төө-Ашуу и Ала-Бел, Суусамырская долина.',
+  'jalal-abad': 'По трассе Бишкек — Ош через Токтогул и Таш-Кумыр.',
+  osh: 'Южная столица — по трассе Бишкек — Ош мимо Токтогульского водохранилища.',
+};
+
+// every route gets a camera box: its path plus Bishkek, padded so pins and labels fit
+const routes = geo.routes.map((r) => {
+  const n = nums(r.d);
+  const xs = [bx, ...n.filter((_, i) => i % 2 === 0)];
+  const ys = [by, ...n.filter((_, i) => i % 2 === 1)];
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const pad = Math.max(x1 - x0, y1 - y0) * 0.28 + 26;
+  return {
+    ...r,
+    box: [x0 - pad, y0 - pad, x1 + pad, y1 + pad].map((v) => v.toFixed(1)).join(','),
+    road: ROAD[r.id] ?? '',
+    wa: waLink(`Салам, Нурбек! Нужен трансфер: Бишкек → ${r.name}. Дата: __, пассажиров: __.`),
+  };
+});
+const first = routes.find((r) => r.id === 'issyk-kul')!;
+const lake = nums(geo.lake);
+const lx = lake.filter((_, i) => i % 2 === 0);
+const ly = lake.filter((_, i) => i % 2 === 1);
+const lakeAt = pct((Math.min(...lx) + Math.max(...lx)) / 2 + 6, (Math.min(...ly) + Math.max(...ly)) / 2 + 4);
+---
+
+<section class="routes" id="routes" aria-labelledby="routes-title">
+  <div class="wrap">
+    <header class="head" data-reveal>
+      <p class="eyebrow">02 · Направления</p>
+      <h2 class="h2" id="routes-title">Куда поедем?</h2>
+      <p class="lead">Отправная точка — Бишкек. Ниже популярные маршруты, но поехать можно в любую точку Кыргызстана: назовите адрес — Нурбек отвезёт.</p>
+    </header>
+
+    <div class="layout">
+      <div class="map" data-reveal>
+        <div class="map__view" data-map data-vw={VW} data-vh={VH}>
+          <div class="map__zoom" style={`aspect-ratio:${VW}/${VH}`}>
+            <Picture src={relief} formats={['avif', 'webp']} alt="Рельефная карта Кыргызстана с маршрутами из Бишкека" widths={[800, 1200, 1800]} sizes="(min-width: 1100px) 720px, 100vw" class="map__img" loading="lazy" />
+            <svg class="map__svg" viewBox={geo.viewBox.join(' ')} aria-hidden="true">
+              <defs>
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="2.4" result="b" />
+                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+                {routes.map((r) => <path id={`rt-${r.id}`} d={r.d} />)}
+                <linearGradient id="lake" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#5fd6cf" />
+                  <stop offset="1" stop-color="#1f8f95" />
+                </linearGradient>
+              </defs>
+              <path class="map__border" d={geo.border} />
+              <path class="map__lake" d={geo.lake} fill="url(#lake)" />
+              {routes.map((r) => <use href={`#rt-${r.id}`} class="route route--base" />)}
+              {routes.map((r) => <use href={`#rt-${r.id}`} class="route route--hot" data-route={r.id} style={`--len:${r.len}`} filter="url(#glow)" />)}
+            </svg>
+            <span class="lake-label" style={lakeAt}>Ысык-Көл</span>
+            {routes.map((r) => (
+              <span class={`pin pin--${r.side}`} data-pin={r.id} style={pct(r.end[0], r.end[1])}>
+                <i class="pin__dot" /><span class="pin__label">{r.name}</span>
+              </span>
+            ))}
+            <span class="pin pin--start pin--w" style={pct(bx, by)}>
+              <i class="pin__dot" /><span class="pin__label">Бишкек</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="side">
+        <ul class="list" role="list">
+          {routes.map((r) => (
+            <li>
+              <button class="dest" type="button" data-pick={r.id} data-box={r.box} aria-pressed={r.id === first.id ? 'true' : 'false'} data-name={r.name} data-km={r.km} data-time={r.time} data-note={r.note} data-road={r.road} data-wa={r.wa}>
+                <span class="dest__name">{r.name}</span>
+                <span class="dest__meta">≈ {r.km} км · {r.time}</span>
+                <Icon name="arrow" size={18} class="dest__arrow" />
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div class="info" aria-live="polite">
+          <p class="info__route">Бишкек <Icon name="arrow" size={18} /> <b data-info-name>{first.name}</b></p>
+          <p class="info__meta"><span data-info-note>{first.note}</span> · ≈&nbsp;<span data-info-km>{first.km}</span>&nbsp;км · <span data-info-time>{first.time}</span> в пути</p>
+          <p class="info__road" data-info-road>{first.road}</p>
+          <div class="info__cta">
+            <a class="btn btn-gold" href={first.wa} target="_blank" rel="noopener" data-info-wa data-cta="route-wa">
+              <span class="btn__icon btn__icon--wa"><Icon name="whatsapp" size={22} /></span>
+              <span>Заказать маршрут</span>
+            </a>
+            <a class="link" href="#order">Другой адрес <Icon name="arrowUp" size={16} /></a>
+          </div>
+        </div>
+        <p class="note">Расстояние и время в пути — ориентировочные, от центра Бишкека.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .routes {
+    position: relative;
+    padding: clamp(64px, 9vw, 130px) 0;
+    background:
+      radial-gradient(80% 60% at 70% 10%, rgb(41 64 120 / 0.35), transparent 70%),
+      var(--color-night);
+    border-top: 1px solid rgb(255 255 255 / 0.06);
+  }
+  .head { max-width: 760px; margin-bottom: clamp(30px, 4vw, 52px); }
+  .head .h2 { margin: 18px 0; }
+  .layout { display: grid; gap: 18px; }
+  @media (min-width: 1100px) {
+    .layout { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 36px; align-items: start; }
+    .map { position: sticky; top: 92px; }
+  }
+
+  /* ---------- map: a fixed view; the camera (translate + scale) flies to the picked route */
+  .map {
+    overflow: hidden;
+    border-radius: 26px;
+    background: radial-gradient(70% 70% at 50% 45%, #121c3a, #0a1024 75%);
+    border: 1px solid rgb(255 255 255 / 0.07);
+  }
+  .map__view {
+    position: relative;
+    aspect-ratio: 1.12;
+    display: grid;
+    align-items: center;
+    --z: 1;
+    --tx: 0%;
+    --ty: 0%;
+  }
+  @media (min-width: 640px) { .map__view { aspect-ratio: 1.5; } }
+  @media (min-width: 1100px) { .map__view { aspect-ratio: 1.36; } }
+  .map__zoom {
+    position: relative;
+    width: 100%;
+    transform-origin: 0 0;
+    transform: translate(var(--tx), var(--ty)) scale(var(--z));
+    transition: transform 1.25s var(--ease-out-expo);
+  }
+  .map__zoom :global(picture), .map__img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .map__img {
+    mask: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent), linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent);
+    mask-composite: intersect;
+  }
+  .map__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .map__border { fill: none; stroke: var(--color-gold); stroke-width: calc(1.7 / var(--z)); stroke-opacity: 0.85; stroke-linejoin: round; filter: url(#glow); }
+  .map__lake { stroke: #9ff0ea; stroke-width: calc(0.8 / var(--z)); stroke-opacity: 0.6; }
+  .route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .route--base { stroke: rgb(255 255 255 / 0.34); stroke-width: calc(1.7 / var(--z)); stroke-dasharray: calc(4 / var(--z)) calc(5 / var(--z)); }
+  .route--hot {
+    stroke: var(--color-gold-2);
+    stroke-width: calc(3.6 / var(--z));
+    stroke-dasharray: calc(var(--len) * 1px + 1px);
+    stroke-dashoffset: calc(var(--len) * 1px + 1px);
+    opacity: 0;
+    transition: stroke-dashoffset 1.5s var(--ease-out-expo) 0.25s, opacity 0.3s;
+  }
+  .route--hot.is-on { stroke-dashoffset: 0; opacity: 1; }
+  @media (max-width: 640px) {
+    .route--base { stroke-width: calc(2.4 / var(--z)); }
+    .route--hot { stroke-width: calc(5 / var(--z)); }
+    .map__border { stroke-width: calc(2.4 / var(--z)); }
+  }
+
+  /* pins are HTML, counter-scaled, so they keep their size whatever the zoom */
+  .pin {
+    position: absolute;
+    width: 0;
+    height: 0;
+    scale: calc(1 / var(--z));
+    transition: scale 1.25s var(--ease-out-expo);
+    pointer-events: none;
+  }
+  .pin__dot {
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgb(255 255 255 / 0.18);
+  }
+  .pin__label {
+    position: absolute;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font: 600 0.8rem/1 var(--font-sans);
+    white-space: nowrap;
+    color: var(--color-ink);
+    background: rgb(9 15 34 / 0.78);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .pin--n .pin__label { bottom: 14px; left: 0; translate: -50% 0; }
+  .pin--s .pin__label { top: 14px; left: 0; translate: -50% 0; }
+  .pin--e .pin__label { left: 14px; top: 0; translate: 0 -50%; }
+  .pin--w .pin__label { right: 14px; top: 0; translate: 0 -50%; }
+  .pin--sw .pin__label { top: 10px; right: 10px; }
+  .pin--se .pin__label { top: 10px; left: 10px; }
+  .pin.is-on .pin__dot { background: var(--color-gold); box-shadow: 0 0 0 5px rgb(246 196 67 / 0.3), 0 0 18px rgb(246 196 67 / 0.8); }
+  .pin.is-on .pin__label { opacity: 1; background: var(--color-gold); color: var(--color-night); border-color: transparent; font-weight: 700; }
+  .pin--start .pin__dot { left: -7px; top: -7px; width: 14px; height: 14px; background: var(--color-gold); animation: beat 2.4s ease-out infinite; }
+  .pin--start .pin__label { opacity: 1; font-weight: 700; }
+  .lake-label {
+    position: absolute;
+    translate: -50% -50%;
+    scale: calc(1 / var(--z));
+    font: 700 0.66rem/1 var(--font-sans);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(6 40 48 / 0.75);
+    white-space: nowrap;
+    transition: scale 1.25s var(--ease-out-expo);
+  }
+  @keyframes beat {
+    0% { box-shadow: 0 0 0 0 rgb(246 196 67 / 0.55); }
+    80%, 100% { box-shadow: 0 0 0 14px rgb(246 196 67 / 0); }
+  }
+
+  /* ---------- list + info */
+  .list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .dest {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    padding: 14px 36px 14px 16px;
+    border-radius: 18px;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    background: rgb(255 255 255 / 0.035);
+    color: var(--color-ink);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  .dest:hover { background: rgb(255 255 255 / 0.07); }
+  .dest[aria-pressed='true'] { background: rgb(246 196 67 / 0.12); border-color: rgb(246 196 67 / 0.55); }
+  .dest__name { font: 600 0.92rem/1.2 var(--font-display); letter-spacing: -0.01em; }
+  .dest__meta { font-size: 0.86rem; color: var(--color-mute); font-variant-numeric: tabular-nums; }
+  .dest__arrow { position: absolute; right: 12px; top: 16px; color: var(--color-gold); opacity: 0; transition: opacity 0.3s, translate 0.3s var(--ease-out-expo); }
+  .dest[aria-pressed='true'] .dest__arrow { opacity: 1; translate: 3px 0; }
+
+  .info {
+    margin-top: 12px;
+    padding: 22px;
+    border-radius: 24px;
+    background: linear-gradient(140deg, rgb(246 196 67 / 0.14), rgb(255 255 255 / 0.03));
+    border: 1px solid rgb(246 196 67 / 0.28);
+  }
+  .info__route { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; font: 700 clamp(1.2rem, 1rem + 0.9vw, 1.55rem)/1.15 var(--font-display); letter-spacing: -0.02em; }
+  .info__route :global(svg) { color: var(--color-gold); }
+  .info__route b { color: var(--color-gold); font-weight: 800; }
+  .info__meta { margin: 10px 0 8px; color: var(--color-mute); }
+  .info__road { margin: 0 0 18px; color: var(--color-ink); opacity: 0.85; font-size: 0.95rem; }
+  .info__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+  .link { display: inline-flex; align-items: center; gap: 6px; color: var(--color-ink); font-weight: 600; text-underline-offset: 4px; }
+  .link:hover { color: var(--color-gold); }
+  .note { margin: 14px 2px 0; font-size: 0.86rem; color: var(--color-mute); }
+</style>
+
+<script>
+  const view = document.querySelector<HTMLElement>('[data-map]');
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-pick]')];
+  const routes = new Map([...document.querySelectorAll<SVGPathElement>('[data-route]')].map((p) => [p.dataset.route!, p]));
+  const pins = new Map([...document.querySelectorAll<HTMLElement>('[data-pin]')].map((p) => [p.dataset.pin!, p]));
+  const $ = (s: string) => document.querySelector<HTMLElement>(s)!;
+  const info = { name: $('[data-info-name]'), km: $('[data-info-km]'), time: $('[data-info-time]'), note: $('[data-info-note]'), road: $('[data-info-road]'), wa: $('[data-info-wa]') as HTMLAnchorElement };
+  let current = '';
+
+  // camera: fit the route's box into the view, in viewBox units, then express it in % of the map
+  function aim(box: number[]) {
+    if (!view) return;
+    const VW = +view.dataset.vw!, VH = +view.dataset.vh!;
+    const r = view.getBoundingClientRect();
+    const Vh = (VW * r.height) / r.width;            // visible height in viewBox units
+    const offY = (Vh - VH) / 2;                      // the map sits centred in the view
+    const [x0, y0, x1, y1] = box;
+    const z = Math.min(3.4, Math.max(1, Math.min(VW / (x1 - x0), Vh / (y1 - y0))));
+    let tx = VW / 2 - ((x0 + x1) / 2) * z;
+    let ty = Vh / 2 - offY - ((y0 + y1) / 2) * z;
+    // keep the view on the map (a small margin past its edges is fine: the relief fades out there)
+    const M = 48;
+    tx = Math.min(M * z, Math.max(VW - (VW + M) * z, tx));
+    ty = (VH + 2 * M) * z >= Vh ? Math.min(M * z - offY, Math.max(Vh - offY - (VH + M) * z, ty)) : (Vh - VH * z) / 2 - offY;
+    view.style.setProperty('--z', z.toFixed(3));
+    view.style.setProperty('--tx', `${((tx / VW) * 100).toFixed(3)}%`);
+    view.style.setProperty('--ty', `${((ty / VH) * 100).toFixed(3)}%`);
+  }
+
+  function pick(id: string) {
+    const b = buttons.find((x) => x.dataset.pick === id);
+    if (!view || !b) return;
+    current = id;
+    aim(b.dataset.box!.split(',').map(Number));
+    buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    routes.forEach((p, key) => p.classList.toggle('is-on', key === id));
+    pins.forEach((p, key) => p.classList.toggle('is-on', key === id));
+    info.name.textContent = b.dataset.name!;
+    info.km.textContent = b.dataset.km!;
+    info.time.textContent = b.dataset.time!;
+    info.note.textContent = b.dataset.note!;
+    info.road.textContent = b.dataset.road!;
+    info.wa.href = b.dataset.wa!;
+  }
+
+  if (view && buttons.length) {
+    // tour the routes until the visitor picks one
+    const order = buttons.map((b) => b.dataset.pick!);
+    let idx = Math.max(0, buttons.findIndex((b) => b.getAttribute('aria-pressed') === 'true'));
+    let timer = 0;
+    let touched = false;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stop = () => { clearInterval(timer); timer = 0; };
+    const start = () => {
+      if (touched || reduce || timer) return;
+      timer = window.setInterval(() => { idx = (idx + 1) % order.length; pick(order[idx]); }, 4200);
+    };
+    buttons.forEach((b, i) => b.addEventListener('click', () => { touched = true; stop(); idx = i; pick(b.dataset.pick!); }));
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { if (!current) setTimeout(() => pick(order[idx]), 500); start(); } else stop();
+    }, { threshold: 0.3 }).observe(view);
+    new ResizeObserver(() => { if (current) { const b = buttons.find((x) => x.dataset.pick === current); if (b) aim(b.dataset.box!.split(',').map(Number)); } }).observe(view);
+  }
+</script>

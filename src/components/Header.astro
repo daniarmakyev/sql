@@ -1,0 +1,153 @@
+---
+import Icon from './Icon.astro';
+import Tunduk from './Tunduk.astro';
+import { INSTAGRAM, PHONE_DISPLAY, TEL, WA_HELLO } from '../data/site';
+
+const links = [
+  { href: '#about', label: 'Поездка' },
+  { href: '#routes', label: 'Направления' },
+  { href: '#car', label: 'Машина' },
+  { href: '#order', label: 'Заказать' },
+  { href: '#faq', label: 'Вопросы' },
+];
+---
+
+<header class="header" data-header>
+  <div class="header__in">
+    <a class="logo" href="#top">
+      <Tunduk class="logo__mark" size={34} stroke={3.4} />
+      <span class="logo__text">
+        <span class="logo__name">Нурбек</span>
+        <span class="logo__tag">трансфер · Кыргызстан</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Разделы">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+
+    <div class="header__cta">
+      <a class="ig" href={INSTAGRAM.url} target="_blank" rel="noopener me" aria-label={`Instagram ${INSTAGRAM.handle}`} data-cta="header-ig"><Icon name="instagram" size={20} /></a>
+      <a class="phone" href={TEL}><Icon name="phone" size={18} />{PHONE_DISPLAY}</a>
+      <a class="wa" href={WA_HELLO} target="_blank" rel="noopener" aria-label="Написать Нурбеку в WhatsApp" data-cta="header-wa">
+        <Icon name="whatsapp" size={20} />
+        <span class="wa__label">WhatsApp</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    padding: max(10px, env(safe-area-inset-top)) 12px 0;
+    pointer-events: none;
+  }
+  .header__in {
+    pointer-events: auto;
+    max-width: 1240px;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 60px;
+    padding: 0 8px 0 14px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: background-color 0.4s, border-color 0.4s, box-shadow 0.4s, backdrop-filter 0.4s;
+  }
+  .header.is-stuck .header__in {
+    background: rgb(9 15 34 / 0.62);
+    border-color: rgb(255 255 255 / 0.1);
+    box-shadow: 0 18px 40px -22px rgb(0 0 0 / 0.7);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  }
+
+  .logo { display: flex; align-items: center; gap: 10px; color: var(--color-ink); text-decoration: none; }
+  .logo__mark { color: var(--color-gold); transition: rotate 0.8s var(--ease-out-expo); }
+  .logo:hover .logo__mark { rotate: 90deg; }
+  .logo__text { display: grid; line-height: 1; }
+  .logo__name { font: 800 1.12rem/1 var(--font-display); letter-spacing: -0.01em; }
+  .logo__tag { margin-top: 4px; font: 500 0.68rem/1 var(--font-sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-mute); white-space: nowrap; }
+
+  .nav { display: none; gap: 4px; }
+  .nav a {
+    padding: 10px 14px;
+    border-radius: 999px;
+    font: 500 0.95rem/1 var(--font-sans);
+    color: rgb(246 241 231 / 0.85);
+    text-decoration: none;
+    transition: background-color 0.25s, color 0.25s;
+  }
+  .nav a:hover { background: rgb(255 255 255 / 0.1); color: #fff; }
+
+  .header__cta { display: flex; align-items: center; gap: 8px; }
+  .phone {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font: 600 0.98rem/1 var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink);
+    text-decoration: none;
+    border-radius: 999px;
+  }
+  .phone:hover { background: rgb(255 255 255 / 0.1); }
+  .ig {
+    display: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--color-ink);
+    transition: background-color 0.25s, color 0.25s;
+  }
+  .ig:hover { background: rgb(255 255 255 / 0.1); color: var(--color-gold); }
+  .phone :global(svg) { color: var(--color-gold); }
+  .wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 16px 0 12px;
+    border-radius: 999px;
+    background: var(--color-gold);
+    color: var(--color-night);
+    font: 700 0.95rem/1 var(--font-sans);
+    text-decoration: none;
+    transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s;
+    box-shadow: 0 8px 24px -10px rgb(246 196 67 / 0.7);
+  }
+  .wa:hover { transform: translateY(-1px); }
+
+  @media (min-width: 1000px) {
+    .nav { display: flex; }
+  }
+  @media (min-width: 1180px) {
+    .phone { display: inline-flex; }
+    .ig { display: grid; }
+  }
+  @media (max-width: 420px) {
+    .logo__tag { display: none; }
+    .wa__label { display: none; }
+    .wa { width: 44px; padding: 0; justify-content: center; }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  if (header) {
+    let stuck = false;
+    const update = () => {
+      const next = window.scrollY > 24;
+      if (next !== stuck) header.classList.toggle('is-stuck', (stuck = next));
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  }
+</script>

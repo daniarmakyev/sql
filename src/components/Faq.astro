@@ -1,0 +1,103 @@
+---
+import Icon from './Icon.astro';
+import { FAQ, INSTAGRAM, WA_HELLO } from '../data/site';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ.map(({ q, a }) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+};
+---
+
+<section class="faq" id="faq" aria-labelledby="faq-title">
+  <div class="wrap faq__in">
+    <div class="faq__side">
+      <p class="eyebrow" data-reveal>04 · Вопросы</p>
+      <h2 class="h2" id="faq-title" data-reveal>Частые вопросы</h2>
+      <div class="ask" data-reveal style="--d:1">
+        <p class="ask__title">Не нашли ответ?</p>
+        <p class="ask__text">Спросите напрямую — Нурбек отвечает в WhatsApp и в Instagram.</p>
+        <div class="ask__cta">
+          <a class="btn btn-gold" href={WA_HELLO} target="_blank" rel="noopener" data-cta="faq-wa">
+            <span class="btn__icon btn__icon--wa"><Icon name="whatsapp" size={22} /></span>
+            <span>WhatsApp</span>
+          </a>
+          <a class="btn btn-glass" href={INSTAGRAM.url} target="_blank" rel="noopener me" data-cta="faq-ig">
+            <span class="btn__icon btn__icon--ig"><Icon name="instagram" size={20} /></span>
+            <span>{INSTAGRAM.handle}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="list">
+      {FAQ.map(({ q, a }, i) => (
+        <details class="item" name="faq" open={i === 0} data-reveal style={`--d:${i % 3}`}>
+          <summary>
+            <span class="item__n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="item__q">{q}</span>
+            <span class="item__icon" aria-hidden="true"><Icon name="chevron" size={20} /></span>
+          </summary>
+          <p class="item__a">{a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</section>
+
+<style>
+  .faq { position: relative; padding: clamp(70px, 9vw, 130px) 0; border-top: 1px solid rgb(255 255 255 / 0.06); }
+  .faq__in { display: grid; gap: 34px; }
+  @media (min-width: 1024px) {
+    .faq__in { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 64px; align-items: start; }
+    .faq__side { position: sticky; top: 110px; }
+  }
+  .faq .h2 { margin: 18px 0 28px; }
+
+  .ask { padding: 24px; border-radius: 24px; background: linear-gradient(140deg, rgb(246 196 67 / 0.12), rgb(255 255 255 / 0.03)); border: 1px solid rgb(246 196 67 / 0.25); }
+  .ask__title { margin: 0 0 6px; font: 700 1.2rem/1.2 var(--font-display); }
+  .ask__text { margin: 0 0 18px; color: var(--color-mute); }
+  .ask__cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn__icon--ig { background: linear-gradient(45deg, #f9ce34, #ee2a7b 55%, #6228d7); color: #fff; }
+
+  .list { display: grid; gap: 10px; }
+  .item {
+    border-radius: 22px;
+    background: rgb(255 255 255 / 0.035);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    transition: background-color 0.3s, border-color 0.3s;
+    interpolate-size: allow-keywords;
+  }
+  .item[open] { background: rgb(246 196 67 / 0.07); border-color: rgb(246 196 67 / 0.3); }
+  .item::details-content { height: 0; overflow: clip; transition: height 0.45s var(--ease-out-expo), content-visibility 0.45s allow-discrete; }
+  .item[open]::details-content { height: auto; }
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 20px 20px 22px;
+    cursor: pointer;
+    list-style: none;
+    border-radius: 22px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  .item__n { flex: none; font: 700 1.1rem/1 var(--font-tall); color: var(--color-gold); }
+  .item__q { flex: 1; font: 600 clamp(1rem, 0.94rem + 0.3vw, 1.12rem)/1.35 var(--font-display); letter-spacing: -0.01em; }
+  .item__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.07);
+    color: var(--color-gold);
+    transition: rotate 0.4s var(--ease-out-expo), background-color 0.3s;
+  }
+  .item[open] .item__icon { rotate: 180deg; background: rgb(246 196 67 / 0.16); }
+  .item__a { margin: 0; padding: 0 22px 22px 56px; color: var(--color-mute); line-height: 1.65; max-width: 640px; }
+  @media (max-width: 640px) {
+    .item__a { padding-left: 22px; }
+  }
+</style>

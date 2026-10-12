@@ -1,0 +1,292 @@
+---
+import QRCode from 'qrcode';
+import Icon from './Icon.astro';
+import Tunduk from './Tunduk.astro';
+import geo from '../data/geo.json';
+import { INSTAGRAM, PHONE_DISPLAY, TEL, waLink } from '../data/site';
+
+// desktop visitors usually book from their phone: a QR that opens the WhatsApp chat
+const qr = await QRCode.toString(waLink(), { type: 'svg', margin: 0, errorCorrectionLevel: 'H', color: { dark: '#090f22', light: '#0000' } });
+
+const steps = [
+  { title: 'Напишите или позвоните', text: 'В WhatsApp или по телефону: откуда, куда, когда и сколько вас.' },
+  { title: 'Согласуем детали', text: 'Нурбек подтвердит время, место встречи и стоимость — цена договорная.' },
+  { title: 'Ак жол!', text: 'Встреча в аэропорту, на вокзале или у дома — и в путь.' },
+];
+const places = geo.routes.map((r) => r.name);
+---
+
+<section class="order felt" id="order" aria-labelledby="order-title">
+  <span class="band order__band" aria-hidden="true"></span>
+  <div class="wrap order__in">
+    <div class="order__text">
+      <p class="eyebrow eyebrow--red" data-reveal>03 · Заказ</p>
+      <h2 class="h2" id="order-title" data-reveal>Заказать поездку — дело одной минуты</h2>
+      <ol class="steps">
+        {steps.map((s, i) => (
+          <li class="step" data-reveal style={`--d:${i}`}>
+            <span class="step__n">{i + 1}</span>
+            <div>
+              <h3 class="step__title">{s.title}</h3>
+              <p class="step__text">{s.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div class="reach">
+        <div class="reach__links">
+          <div class="call-row">
+            <a class="call" href={TEL} data-cta="order-call">
+              <span class="call__icon"><Icon name="phone" size={22} /></span>
+              <span><span class="call__hint">Удобнее голосом? Звоните</span><span class="call__num">{PHONE_DISPLAY}</span></span>
+            </a>
+            <button class="copy" type="button" data-copy={PHONE_DISPLAY} data-copied="Номер скопирован" aria-label="Скопировать номер"><Icon name="copy" size={18} /></button>
+          </div>
+          <a class="call call--ig" href={INSTAGRAM.url} target="_blank" rel="noopener me" data-cta="order-ig">
+            <span class="call__icon"><Icon name="instagram" size={22} /></span>
+            <span><span class="call__hint">Или пишите в Instagram</span><span class="call__num call__num--sm">{INSTAGRAM.handle}</span></span>
+          </a>
+        </div>
+        <figure class="qr" aria-label="QR-код: открыть чат WhatsApp с Нурбеком">
+          <div class="qr__code"><Fragment set:html={qr} /><span class="qr__mark"><Tunduk size={30} stroke={4} /></span></div>
+          <figcaption>Наведите камеру телефона — откроется чат в WhatsApp</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <form class="trip" action={waLink()} method="get" target="_blank" data-trip data-reveal style="--d:1">
+      <div class="trip__head">
+        <h3 class="trip__title">Соберите заявку</h3>
+        <p class="trip__sub">Откроется WhatsApp с готовым сообщением — останется нажать «отправить».</p>
+      </div>
+
+      <div class="field field--wide">
+        <label for="t-from">Откуда</label>
+        <input id="t-from" name="from" type="text" value="Бишкек" autocomplete="off" placeholder="Бишкек, адрес или аэропорт" />
+      </div>
+      <div class="field field--wide">
+        <label for="t-to">Куда</label>
+        <input id="t-to" name="to" type="text" list="t-places" autocomplete="off" placeholder="Например, Каракол" required />
+        <datalist id="t-places">{places.map((p) => <option value={p} />)}</datalist>
+      </div>
+      <div class="field">
+        <label for="t-date">Дата</label>
+        <input id="t-date" name="date" type="date" required />
+      </div>
+      <div class="field">
+        <label for="t-time">Время</label>
+        <input id="t-time" name="time" type="time" value="09:00" />
+      </div>
+      <div class="field field--wide">
+        <span class="label" id="t-pax-label">Пассажиров</span>
+        <div class="stepper" role="group" aria-labelledby="t-pax-label">
+          <button type="button" data-pax="-1" aria-label="Меньше"><Icon name="minus" size={20} /></button>
+          <output id="t-pax" data-pax-out aria-live="polite">2</output>
+          <button type="button" data-pax="1" aria-label="Больше"><Icon name="plus" size={20} /></button>
+          <span class="stepper__hint">до 7 мест</span>
+        </div>
+      </div>
+      <div class="field field--wide">
+        <label for="t-note">Комментарий <span class="opt">— по желанию</span></label>
+        <textarea id="t-note" name="note" rows="2" placeholder="Номер рейса, багаж, остановки по пути"></textarea>
+      </div>
+      <input type="hidden" name="text" value="Салам, Нурбек! Хочу заказать трансфер." data-text />
+      <button class="btn btn-gold trip__send" type="submit" data-cta="order-wa">
+        <span class="btn__icon btn__icon--wa"><Icon name="whatsapp" size={22} /></span>
+        <span>Отправить в WhatsApp</span>
+      </button>
+    </form>
+  </div>
+  <span class="band band--down order__band order__band--bottom" aria-hidden="true"></span>
+</section>
+
+<style>
+  .order { position: relative; padding: clamp(70px, 9vw, 130px) 0; overflow: hidden; }
+  .order__band { position: absolute; left: 0; right: 0; top: 18px; color: var(--color-red); opacity: 0.9; }
+  .order__band--bottom { top: auto; bottom: 18px; }
+  .order__in { display: grid; gap: 40px; }
+  @media (min-width: 1024px) {
+    .order__in { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: start; }
+  }
+  .eyebrow--red { color: var(--color-red); }
+  .order .h2 { margin: 18px 0 30px; color: var(--color-felt-ink); }
+
+  .steps { display: grid; gap: 14px; margin: 0 0 30px; padding: 0; list-style: none; }
+  .step { display: flex; gap: 18px; align-items: flex-start; padding: 18px; border-radius: 22px; background: rgb(255 255 255 / 0.45); border: 1px solid rgb(29 24 48 / 0.08); }
+  .step__n {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: var(--color-felt-ink);
+    color: var(--color-gold);
+    font: 700 1.6rem/1 var(--font-tall);
+  }
+  .step__title { margin: 2px 0 6px; font: 700 1.1rem/1.2 var(--font-display); letter-spacing: -0.01em; }
+  .step__text { margin: 0; color: var(--color-felt-mute); }
+
+  .call { display: inline-flex; align-items: center; gap: 14px; color: var(--color-felt-ink); text-decoration: none; }
+  .call__icon { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: var(--color-red); color: #fff; box-shadow: 0 10px 26px -10px rgb(196 55 45 / 0.8); }
+  .call__hint { display: block; font-size: 0.9rem; color: var(--color-felt-mute); }
+  .call__num { display: block; font: 800 clamp(1.4rem, 1.1rem + 1vw, 1.8rem)/1.1 var(--font-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .call:hover .call__num { color: var(--color-red); }
+  .call__num--sm { font-size: clamp(1.1rem, 0.95rem + 0.6vw, 1.35rem); }
+  .call-row { display: flex; align-items: center; gap: 12px; }
+  .copy {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgb(29 24 48 / 0.15);
+    background: rgb(255 255 255 / 0.5);
+    color: var(--color-felt-ink);
+    cursor: pointer;
+    transition: background-color 0.25s, color 0.25s;
+  }
+  .copy:hover { background: var(--color-felt-ink); color: var(--color-gold); }
+  .call--ig .call__icon { background: linear-gradient(45deg, #f9ce34, #ee2a7b 55%, #6228d7); box-shadow: 0 10px 26px -10px rgb(238 42 123 / 0.6); }
+
+  .reach { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 22px 30px; }
+  .reach__links { display: grid; gap: 18px; }
+  .qr { display: none; margin: 0; align-items: center; gap: 14px; max-width: 290px; }
+  .qr__code {
+    position: relative;
+    flex: none;
+    width: 118px;
+    padding: 10px;
+    border-radius: 18px;
+    background: #fffaf0;
+    box-shadow: 0 16px 34px -18px rgb(29 24 48 / 0.6);
+  }
+  .qr__code :global(svg) { width: 100%; height: auto; }
+  .qr__mark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--color-night);
+    color: var(--color-gold);
+  }
+  .qr figcaption { font-size: 0.9rem; line-height: 1.4; color: var(--color-felt-mute); }
+  @media (min-width: 1024px) and (hover: hover) {
+    .qr { display: flex; }
+  }
+
+  /* ---------- trip builder */
+  .trip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 12px;
+    padding: clamp(20px, 3vw, 32px);
+    border-radius: 30px;
+    background: var(--color-night);
+    color: var(--color-ink);
+    box-shadow: 0 40px 80px -40px rgb(29 24 48 / 0.7);
+    position: relative;
+  }
+  .trip::before {
+    /* a gold ram's-horn crest on the card */
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    width: 64px;
+    height: 32px;
+    translate: -50% 0;
+    background: var(--color-gold);
+    mask: var(--horn) center / contain no-repeat;
+  }
+  .trip__head { grid-column: 1 / -1; margin-bottom: 4px; }
+  .trip__title { margin: 0 0 6px; font: 800 1.5rem/1.1 var(--font-display); letter-spacing: -0.02em; }
+  .trip__sub { margin: 0; color: var(--color-mute); font-size: 0.95rem; }
+  .field { display: grid; gap: 7px; min-width: 0; }
+  .field--wide { grid-column: 1 / -1; }
+  .field label, .label { font-size: 0.86rem; font-weight: 600; color: var(--color-mute); }
+  .opt { font-weight: 400; }
+  .field input, .field textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 13px 16px;
+    border-radius: 16px;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    background: rgb(255 255 255 / 0.05);
+    color: var(--color-ink);
+    font: 500 1rem/1.3 var(--font-sans);
+    color-scheme: dark;
+    transition: border-color 0.25s, background-color 0.25s;
+  }
+  .field textarea { resize: vertical; min-height: 76px; }
+  .field input::placeholder, .field textarea::placeholder { color: rgb(158 169 197 / 0.7); }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--color-gold); background: rgb(255 255 255 / 0.08); }
+  .field input:user-invalid { border-color: #ff7a6b; }
+  .stepper { display: flex; align-items: center; gap: 10px; }
+  .stepper button {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    background: rgb(255 255 255 / 0.05);
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  .stepper button:hover { border-color: var(--color-gold); color: var(--color-gold); }
+  .stepper output { min-width: 2ch; text-align: center; font: 700 1.9rem/1 var(--font-tall); color: var(--color-gold); }
+  .stepper__hint { margin-left: 6px; color: var(--color-mute); font-size: 0.9rem; }
+  .trip__send { grid-column: 1 / -1; margin-top: 6px; justify-content: flex-start; }
+  .trip__send > span:last-child { margin-inline: auto; padding-right: 42px; }
+</style>
+
+<script>
+  import { sameTab } from '../scripts/social';
+
+  const form = document.querySelector<HTMLFormElement>('[data-trip]');
+  if (form) {
+    const out = form.querySelector<HTMLOutputElement>('[data-pax-out]')!;
+    const text = form.querySelector<HTMLInputElement>('[data-text]')!;
+    const date = form.querySelector<HTMLInputElement>('#t-date')!;
+    let pax = 2;
+    // earliest date = today in Bishkek
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bishkek' }).format(new Date());
+    date.min = today;
+    if (!date.value) date.value = today;
+    form.querySelectorAll<HTMLButtonElement>('[data-pax]').forEach((b) =>
+      b.addEventListener('click', () => {
+        pax = Math.min(7, Math.max(1, pax + Number(b.dataset.pax)));
+        out.textContent = String(pax);
+      }),
+    );
+    const pretty = (iso: string) => {
+      const [y, m, d] = iso.split('-').map(Number);
+      if (!y) return iso;
+      return new Intl.DateTimeFormat('ru-RU', { weekday: 'short', day: 'numeric', month: 'long' }).format(new Date(y, m - 1, d));
+    };
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = (n: string) => (form.elements.namedItem(n) as HTMLInputElement | null)?.value.trim() || '';
+      const lines = [
+        'Салам, Нурбек! Хочу заказать трансфер.',
+        `📍 Откуда: ${v('from') || 'Бишкек'}`,
+        `🏁 Куда: ${v('to')}`,
+        `📅 Когда: ${pretty(v('date'))}${v('time') ? `, ${v('time')}` : ''}`,
+        `👥 Пассажиров: ${pax}`,
+      ];
+      if (v('note')) lines.push(`💬 ${v('note')}`);
+      text.value = lines.join('\n');
+      const url = `${form.action}?text=${encodeURIComponent(text.value)}`;
+      if (sameTab) { location.href = url; return; }
+      const w = window.open(url, '_blank');
+      if (w) w.opener = null;
+      else location.href = url;
+    });
+  }
+</script>
